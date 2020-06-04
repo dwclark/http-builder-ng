@@ -20,6 +20,7 @@ import com.stehno.ersatz.ErsatzServer
 import groovyx.net.http.optional.Download
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -344,5 +345,27 @@ class UriBuilderSpec extends Specification {
         'http://localhost:9191/something'  | 'more/pathy'  || 'http://localhost:9191/something/more/pathy'
         'http://localhost:9191/something/' | '/more/pathy' || 'http://localhost:9191/more/pathy'
         'http://localhost:9191/something'  | '/more/pathy' || 'http://localhost:9191/more/pathy'
+    }
+
+    @Issue('#210')
+    def 'relative paths should work with GSting'() {
+        when: 'path casted to java.lang.String'
+        URI withString = basic(root())
+                .setFull("http://localhost:9191/something/")
+                .setPath("more/pathy")
+                .toURI()
+
+        then:
+        withString == 'http://localhost:9191/something/more/pathy'.toURI()
+
+        when: 'past as GString'
+        String pathy = 'pathy'
+        URI withGString = basic(root())
+                .setFull("http://localhost:9191/something/")
+                .setPath("more/$pathy")
+                .toURI()
+
+        then:
+        withGString == 'http://localhost:9191/something/more/pathy'.toURI()
     }
 }

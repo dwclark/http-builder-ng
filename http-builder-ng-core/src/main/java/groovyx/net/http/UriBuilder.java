@@ -48,7 +48,7 @@ import static java.util.Collections.singletonList;
  */
 public abstract class UriBuilder {
 
-    public static final int DEFAULT_PORT = -1;
+	public static final int DEFAULT_PORT = -1;
 
     /**
      * Sets the scheme part of the URI.
@@ -58,12 +58,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setScheme(String val);
 
-    /**
-     * Retrieves the scheme part of the URI.
-     *
-     * @return the URI scheme
-     */
-    public abstract String getScheme();
+	/**
+	 * Retrieves the scheme part of the URI.
+	 *
+	 * @return the URI scheme
+	 */
+	public abstract String getScheme();
 
     /**
      * Sets the port part of the URI.
@@ -73,12 +73,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setPort(int val);
 
-    /**
-     * Retrieves the port part of the URI.
-     *
-     * @return the port part of the URI
-     */
-    public abstract int getPort();
+	/**
+	 * Retrieves the port part of the URI.
+	 *
+	 * @return the port part of the URI
+	 */
+	public abstract int getPort();
 
     /**
      * Sets the host part of the URI.
@@ -88,12 +88,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setHost(String val);
 
-    /**
-     * Retrieves the host part of the URI.
-     *
-     * @return the host part of the URI
-     */
-    public abstract String getHost();
+	/**
+	 * Retrieves the host part of the URI.
+	 *
+	 * @return the host part of the URI
+	 */
+	public abstract String getHost();
 
     /**
      * Sets the path part of the URI.
@@ -103,12 +103,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setPath(GString val);
 
-    /**
-     * Retrieves the path part of the URI.
-     *
-     * @return the path part of the URI
-     */
-    public abstract GString getPath();
+	/**
+	 * Retrieves the path part of the URI.
+	 *
+	 * @return the path part of the URI
+	 */
+	public abstract GString getPath();
 
     /**
      * Sets the query string part of the `URI` from the provided map. The query string key-value pairs will be generated from the key-value pairs
@@ -119,12 +119,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setQuery(Map<String, ?> val);
 
-    /**
-     * Retrieves the `Map` of query string parameters for the `URI`.
-     *
-     * @return the `Map` of query string parameters for the `URI`.
-     */
-    public abstract Map<String, ?> getQuery();
+	/**
+	 * Retrieves the `Map` of query string parameters for the `URI`.
+	 *
+	 * @return the `Map` of query string parameters for the `URI`.
+	 */
+	public abstract Map<String, ?> getQuery();
 
     /**
      * Sets the fragment part of the `URI`.
@@ -134,12 +134,12 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setFragment(String val);
 
-    /**
-     * Retrieves the fragment part of the `URI`.
-     *
-     * @return the fragment part of the `URI`
-     */
-    public abstract String getFragment();
+	/**
+	 * Retrieves the fragment part of the `URI`.
+	 *
+	 * @return the fragment part of the `URI`
+	 */
+	public abstract String getFragment();
 
     /**
      * Sets the user info part of the `URI`.
@@ -149,66 +149,66 @@ public abstract class UriBuilder {
      */
     public abstract UriBuilder setUserInfo(String val);
 
-    /**
-     * Retrieves the user info part of the `URI`.
-     *
-     * @return the user info part of the `URI`
-     */
-    public abstract String getUserInfo();
+	/**
+	 * Retrieves the user info part of the `URI`.
+	 *
+	 * @return the user info part of the `URI`
+	 */
+	public abstract String getUserInfo();
 
-    public abstract UriBuilder getParent();
+	public abstract UriBuilder getParent();
 
     /**
      * Sets the path part of the URI.
      *
-     * @param str the path part of the URI
+     * @param chars a {@link CharSequence} ({@link String} or {@link GString})
+     *
      * @return a reference to the builder
      */
-    public UriBuilder setPath(final String str) {
-        final String[] parts;
-        if (str.startsWith("/")) {
-            parts = new String[]{str};
-        } else {
-            final String base = getPath().toString();
-            parts = new String[]{base, base.endsWith("/") ? "" : "/", str};
-        }
+    public UriBuilder setPath(final CharSequence chars) {
+		final String[] parts;
+        if (chars.charAt(0) == '/') {
+			parts = new String[] { chars.toString() };
+		} else {
+			final String base = getPath().toString();
+			parts = new String[] { base, base.endsWith("/") ? "" : "/", chars.toString() };
+		}
+		return setPath(new GStringImpl(EMPTY, parts));
+	}
 
-        return setPath(new GStringImpl(EMPTY, parts));
-    }
+	public URI forCookie(final HttpCookie cookie) throws URISyntaxException {
+		final String scheme = traverse(this, UriBuilder::getParent, UriBuilder::getScheme, Traverser::notNull);
+		final Integer port = traverse(this, UriBuilder::getParent, UriBuilder::getPort, notValue(DEFAULT_PORT));
+		final String host = traverse(this, UriBuilder::getParent, UriBuilder::getHost, Traverser::notNull);
+		final String path = cookie.getPath();
+		final String query = null;
+		final String fragment = null;
+		final String userInfo = null;
 
-    public URI forCookie(final HttpCookie cookie) throws URISyntaxException {
-        final String scheme = traverse(this, UriBuilder::getParent, UriBuilder::getScheme, Traverser::notNull);
-        final Integer port = traverse(this, UriBuilder::getParent, UriBuilder::getPort, notValue(DEFAULT_PORT));
-        final String host = traverse(this, UriBuilder::getParent, UriBuilder::getHost, Traverser::notNull);
-        final String path = cookie.getPath();
-        final String query = null;
-        final String fragment = null;
-        final String userInfo = null;
+		return new URI(scheme, userInfo, host, (port == null ? -1 : port), path, query, fragment);
+	}
 
-        return new URI(scheme, userInfo, host, (port == null ? -1 : port), path, query, fragment);
-    }
+	/**
+	 * Converts the parts of the `UriBuilder` to the `URI` object instance.
+	 *
+	 * @return the generated `URI` representing the parts contained in the builder
+	 */
+	public URI toURI() throws URISyntaxException {
+		final String scheme = traverse(this, UriBuilder::getParent, UriBuilder::getScheme, Traverser::notNull);
+		final Integer port = traverse(this, UriBuilder::getParent, UriBuilder::getPort, notValue(DEFAULT_PORT));
+		final String host = traverse(this, UriBuilder::getParent, UriBuilder::getHost, Traverser::notNull);
+		final GString path = traverse(this, UriBuilder::getParent, UriBuilder::getPath, Traverser::notNull);
+		final String query = populateQueryString(traverse(this, UriBuilder::getParent, UriBuilder::getQuery, Traverser::nonEmptyMap));
+		final String fragment = traverse(this, UriBuilder::getParent, UriBuilder::getFragment, Traverser::notNull);
+		final String userInfo = traverse(this, UriBuilder::getParent, UriBuilder::getUserInfo, Traverser::notNull);
+		final Boolean useRaw = traverse(this, UriBuilder::getParent, UriBuilder::getUseRawValues, Traverser::notNull);
 
-    /**
-     * Converts the parts of the `UriBuilder` to the `URI` object instance.
-     *
-     * @return the generated `URI` representing the parts contained in the builder
-     */
-    public URI toURI() throws URISyntaxException {
-        final String scheme = traverse(this, UriBuilder::getParent, UriBuilder::getScheme, Traverser::notNull);
-        final Integer port = traverse(this, UriBuilder::getParent, UriBuilder::getPort, notValue(DEFAULT_PORT));
-        final String host = traverse(this, UriBuilder::getParent, UriBuilder::getHost, Traverser::notNull);
-        final GString path = traverse(this, UriBuilder::getParent, UriBuilder::getPath, Traverser::notNull);
-        final String query = populateQueryString(traverse(this, UriBuilder::getParent, UriBuilder::getQuery, Traverser::nonEmptyMap));
-        final String fragment = traverse(this, UriBuilder::getParent, UriBuilder::getFragment, Traverser::notNull);
-        final String userInfo = traverse(this, UriBuilder::getParent, UriBuilder::getUserInfo, Traverser::notNull);
-        final Boolean useRaw = traverse(this, UriBuilder::getParent, UriBuilder::getUseRawValues, Traverser::notNull);
-
-        if (useRaw != null && useRaw) {
-            return toRawURI(scheme, port, host, path, query, fragment, userInfo);
-        } else {
-            return new URI(scheme, userInfo, host, (port == null ? -1 : port), ((path == null) ? null : path.toString()), query, fragment);
-        }
-    }
+		if (useRaw != null && useRaw) {
+			return toRawURI(scheme, port, host, path, query, fragment, userInfo);
+		} else {
+			return new URI(scheme, userInfo, host, (port == null ? -1 : port), ((path == null) ? null : path.toString()), query, fragment);
+		}
+	}
 
     private URI toRawURI(final String scheme, final Integer port, final String host, final GString path, final String query, final String fragment, final String userInfo) throws URISyntaxException {
         return new URI(format("%s%s%s%s%s%s%s",
@@ -222,14 +222,14 @@ public abstract class UriBuilder {
         ));
     }
 
-    private static final Object[] EMPTY = new Object[0];
+	private static final Object[] EMPTY = new Object[0];
 
-    private static String populateQueryString(final Map<String, ?> queryMap) {
-        if (queryMap == null || queryMap.isEmpty()) {
-            return null;
+	private static String populateQueryString(final Map<String, ?> queryMap) {
+		if (queryMap == null || queryMap.isEmpty()) {
+			return null;
 
-        } else {
-            final List<String> nvps = new LinkedList<>();
+		} else {
+			final List<String> nvps = new LinkedList<>();
 
             queryMap.entrySet().forEach((Consumer<Map.Entry<String, ?>>) entry -> {
                 final Collection<?> values = entry.getValue() instanceof Collection ? (Collection<?>) entry.getValue() : singletonList(entry.getValue().toString());
@@ -240,66 +240,66 @@ public abstract class UriBuilder {
                 }
             });
 
-            return nvps.stream().collect(Collectors.joining("&"));
-        }
-    }
+			return nvps.stream().collect(Collectors.joining("&"));
+		}
+	}
 
-    private Boolean useRawValues;
+	private Boolean useRawValues;
 
-    public void setUseRawValues(final boolean useRaw) {
-        this.useRawValues = useRaw;
-    }
+	public void setUseRawValues(final boolean useRaw) {
+		this.useRawValues = useRaw;
+	}
 
-    public Boolean getUseRawValues() {
-        return useRawValues;
-    }
+	public Boolean getUseRawValues() {
+		return useRawValues;
+	}
 
-    protected final void populateFrom(final URI uri) {
-        boolean useRaw = useRawValues != null ? useRawValues : false;
+	protected final void populateFrom(final URI uri) {
+		boolean useRaw = useRawValues != null ? useRawValues : false;
 
-        try {
-            setScheme(uri.getScheme());
-            setPort(uri.getPort());
-            setHost(uri.getHost());
+		try {
+			setScheme(uri.getScheme());
+			setPort(uri.getPort());
+			setHost(uri.getHost());
 
             final String path = useRaw ? uri.getRawPath() : uri.getPath();
             if (path != null) {
                 setPath(new GStringImpl(EMPTY, new String[]{path}));
             }
 
-            final String rawQuery = useRaw ? uri.getRawQuery() : uri.getQuery();
-            if (rawQuery != null) {
-                if (useRaw) {
-                    setQuery(extractQueryMap(rawQuery));
-                } else {
-                    setQuery(Form.decode(new StringBuilder(rawQuery), UTF_8));
-                }
-            }
+			final String rawQuery = useRaw ? uri.getRawQuery() : uri.getQuery();
+			if (rawQuery != null) {
+				if (useRaw) {
+					setQuery(extractQueryMap(rawQuery));
+				} else {
+					setQuery(Form.decode(new StringBuilder(rawQuery), UTF_8));
+				}
+			}
 
-            setFragment(useRaw ? uri.getRawFragment() : uri.getFragment());
-            setUserInfo(useRaw ? uri.getRawUserInfo() : uri.getUserInfo());
-        } catch (IOException e) {
-            //this seems o.k. to just convert to a runtime exception,
-            //we started with a valid URI, so this should never happen.
-            throw new RuntimeException(e);
-        }
-    }
+			setFragment(useRaw ? uri.getRawFragment() : uri.getFragment());
+			setUserInfo(useRaw ? uri.getRawUserInfo() : uri.getUserInfo());
+		} catch (IOException e) {
+			//this seems o.k. to just convert to a runtime exception,
+			//we started with a valid URI, so this should never happen.
+			throw new RuntimeException(e);
+		}
+	}
 
-    // does not do any encoding
-    private static Map<String, Collection<String>> extractQueryMap(final String queryString) {
-        final Map<String, Collection<String>> map = new HashMap<>();
+	// does not do any encoding
+	private static Map<String, Collection<String>> extractQueryMap(final String queryString) {
+		final Map<String, Collection<String>> map = new HashMap<>();
 
-        for (final String nvp : queryString.split("&")) {
-            final String[] pair = nvp.split("=");
-            map.computeIfAbsent(pair[0], k -> {
-                List<String> list = new LinkedList<>();
-                list.add(pair[1]);
-                return list;
-            });
-        }
+		for (final String nvp : queryString.split("&")) {
+			final String[] pair = nvp.split("=");
+			map.computeIfAbsent(pair[0], k -> {
+				List<String> list = new LinkedList<>();
+				list.add(pair[1]);
+				return list;
+			});
+		}
 
-        return map;
-    }
+		return map;
+	}
 
     /**
      * Sets the full URI (all parts) as a String.
@@ -367,187 +367,187 @@ public abstract class UriBuilder {
         return new ThreadSafe(parent);
     }
 
-    public static UriBuilder root() {
-        return new ThreadSafe(null);
-    }
+	public static UriBuilder root() {
+		return new ThreadSafe(null);
+	}
 
     private static final class Basic extends UriBuilder {
         private String scheme;
 
-        public UriBuilder setScheme(String val) {
-            scheme = val;
-            return this;
-        }
+		public UriBuilder setScheme(String val) {
+			scheme = val;
+			return this;
+		}
 
-        public String getScheme() {
-            return scheme;
-        }
+		public String getScheme() {
+			return scheme;
+		}
 
-        private int port = DEFAULT_PORT;
+		private int port = DEFAULT_PORT;
 
-        public UriBuilder setPort(int val) {
-            port = val;
-            return this;
-        }
+		public UriBuilder setPort(int val) {
+			port = val;
+			return this;
+		}
 
-        public int getPort() {
-            return port;
-        }
+		public int getPort() {
+			return port;
+		}
 
-        private String host;
+		private String host;
 
-        public UriBuilder setHost(String val) {
-            host = val;
-            return this;
-        }
+		public UriBuilder setHost(String val) {
+			host = val;
+			return this;
+		}
 
-        public String getHost() {
-            return host;
-        }
+		public String getHost() {
+			return host;
+		}
 
-        private GString path;
+		private GString path;
 
-        public UriBuilder setPath(GString val) {
-            path = val;
-            return this;
-        }
+		public UriBuilder setPath(GString val) {
+			path = val;
+			return this;
+		}
 
-        public GString getPath() {
-            return path;
-        }
+		public GString getPath() {
+			return path;
+		}
 
-        private Map<String, Object> query = new LinkedHashMap<>(1);
+		private Map<String, Object> query = new LinkedHashMap<>(1);
 
-        public UriBuilder setQuery(final Map<String, ?> val) {
-            if (val != null) {
-                query.putAll(val);
-            }
-            return this;
-        }
+		public UriBuilder setQuery(final Map<String, ?> val) {
+			if (val != null) {
+				query.putAll(val);
+			}
+			return this;
+		}
 
-        public Map<String, Object> getQuery() {
-            return query;
-        }
+		public Map<String, Object> getQuery() {
+			return query;
+		}
 
-        private String fragment;
+		private String fragment;
 
-        public UriBuilder setFragment(String val) {
-            fragment = val;
-            return this;
-        }
+		public UriBuilder setFragment(String val) {
+			fragment = val;
+			return this;
+		}
 
-        public String getFragment() {
-            return fragment;
-        }
+		public String getFragment() {
+			return fragment;
+		}
 
-        private String userInfo;
+		private String userInfo;
 
-        public UriBuilder setUserInfo(String val) {
-            userInfo = val;
-            return this;
-        }
+		public UriBuilder setUserInfo(String val) {
+			userInfo = val;
+			return this;
+		}
 
-        public String getUserInfo() {
-            return userInfo;
-        }
+		public String getUserInfo() {
+			return userInfo;
+		}
 
-        private final UriBuilder parent;
+		private final UriBuilder parent;
 
-        public UriBuilder getParent() {
-            return parent;
-        }
+		public UriBuilder getParent() {
+			return parent;
+		}
 
-        public Basic(final UriBuilder parent) {
-            this.parent = parent;
-        }
-    }
+		public Basic(final UriBuilder parent) {
+			this.parent = parent;
+		}
+	}
 
     private static final class ThreadSafe extends UriBuilder {
         private volatile String scheme;
 
-        public UriBuilder setScheme(String val) {
-            scheme = val;
-            return this;
-        }
+		public UriBuilder setScheme(String val) {
+			scheme = val;
+			return this;
+		}
 
-        public String getScheme() {
-            return scheme;
-        }
+		public String getScheme() {
+			return scheme;
+		}
 
-        private volatile int port = DEFAULT_PORT;
+		private volatile int port = DEFAULT_PORT;
 
-        public UriBuilder setPort(int val) {
-            port = val;
-            return this;
-        }
+		public UriBuilder setPort(int val) {
+			port = val;
+			return this;
+		}
 
-        public int getPort() {
-            return port;
-        }
+		public int getPort() {
+			return port;
+		}
 
-        private volatile String host;
+		private volatile String host;
 
-        public UriBuilder setHost(String val) {
-            host = val;
-            return this;
-        }
+		public UriBuilder setHost(String val) {
+			host = val;
+			return this;
+		}
 
-        public String getHost() {
-            return host;
-        }
+		public String getHost() {
+			return host;
+		}
 
-        private volatile GString path;
+		private volatile GString path;
 
-        public UriBuilder setPath(GString val) {
-            path = val;
-            return this;
-        }
+		public UriBuilder setPath(GString val) {
+			path = val;
+			return this;
+		}
 
-        public GString getPath() {
-            return path;
-        }
+		public GString getPath() {
+			return path;
+		}
 
-        private Map<String, Object> query = new ConcurrentHashMap<>();
+		private Map<String, Object> query = new ConcurrentHashMap<>();
 
-        public UriBuilder setQuery(Map<String, ?> val) {
-            query.putAll(val);
-            return this;
-        }
+		public UriBuilder setQuery(Map<String, ?> val) {
+			query.putAll(val);
+			return this;
+		}
 
-        public Map<String, ?> getQuery() {
-            return query;
-        }
+		public Map<String, ?> getQuery() {
+			return query;
+		}
 
-        private volatile String fragment;
+		private volatile String fragment;
 
-        public UriBuilder setFragment(String val) {
-            fragment = val;
-            return this;
-        }
+		public UriBuilder setFragment(String val) {
+			fragment = val;
+			return this;
+		}
 
-        public String getFragment() {
-            return fragment;
-        }
+		public String getFragment() {
+			return fragment;
+		}
 
-        private volatile String userInfo;
+		private volatile String userInfo;
 
-        public UriBuilder setUserInfo(String val) {
-            userInfo = val;
-            return this;
-        }
+		public UriBuilder setUserInfo(String val) {
+			userInfo = val;
+			return this;
+		}
 
-        public String getUserInfo() {
-            return userInfo;
-        }
+		public String getUserInfo() {
+			return userInfo;
+		}
 
-        private final UriBuilder parent;
+		private final UriBuilder parent;
 
-        public UriBuilder getParent() {
-            return parent;
-        }
+		public UriBuilder getParent() {
+			return parent;
+		}
 
-        public ThreadSafe(final UriBuilder parent) {
-            this.parent = parent;
-        }
-    }
+		public ThreadSafe(final UriBuilder parent) {
+			this.parent = parent;
+		}
+	}
 }
